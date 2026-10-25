@@ -139,9 +139,17 @@ def extract_price(text: str) -> str:
     return raw
 
 
+# Capitalized label words that LOCATION_RE can swallow as part of a city name
+# ("Located Boise, ID").
+_LOCATION_LABEL_RE = re.compile(r"^(?:(?:Located|Location|Based|Hangared|In|At)\s+)+")
+
+
 def extract_location(text: str) -> str:
     m = LOCATION_RE.search(text)
-    return f"{m.group(1)}, {m.group(2)}" if m else "Unknown"
+    if not m:
+        return "Unknown"
+    city = _LOCATION_LABEL_RE.sub("", m.group(1)) or m.group(1)
+    return f"{city}, {m.group(2)}"
 
 
 def extract_date(text: str) -> str:
